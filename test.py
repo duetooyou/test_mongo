@@ -1,35 +1,19 @@
+import asyncio
+import httpx
 import pytest
 from asgi_lifespan import LifespanManager
-from httpx import AsyncClient
-from starlette.responses import PlainTextResponse
-from main import app as my_app
+from main import app
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture
-async def app():
-    async def startup():
-        print("Starting up")
-
-    async def shutdown():
-        print("Shutting down")
-
-    async def home(request):
-        return PlainTextResponse("Hello, world!")
-
-    app = my_app
-
+async def test_client():
     async with LifespanManager(app):
-        print("We're in!")
-        yield app
-
-
-@pytest.fixture
-async def client(app):
-    async with AsyncClient(app=my_app) as client:
-        print("Client is ready")
-        yield client
-
-
-@pytest.mark.anyio()
-async def test_get_all_employees(client):
-    print("OK")
+        async with httpx.AsyncClient(app=app, base_url="http://test") as test_client:
+            yield test_client

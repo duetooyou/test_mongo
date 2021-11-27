@@ -1,5 +1,6 @@
-from fastapi import APIRouter
-from database import employee_collection
+from fastapi import APIRouter, Query, Depends
+from motor.motor_asyncio import AsyncIOMotorDatabase
+from database import get_database
 from models import ResponseModel, Employee, ErrorResponseModel
 
 
@@ -8,10 +9,8 @@ router_employees = APIRouter(prefix="/employees",
 
 
 @router_employees.get('/')
-async def get_some_info():
-    employees_result = []
-    async for employee in employee_collection.find():
-        employees_result.append(Employee(**employee))
-    if employees_result:
-        return ResponseModel(employees_result, "AllRight")
-    return ErrorResponseModel(employees_result, '404', 'Empty')
+async def get_all_employees(database: AsyncIOMotorDatabase = Depends(get_database),
+                            company: str = Query('Google')) -> ResponseModel:
+    collection = database.employee_collection.find({"company": company})
+    employees = [Employee(**employees) async for employees in collection]
+    return employees

@@ -1,6 +1,10 @@
-from motor import motor_asyncio
+from motor.motor_asyncio import (AsyncIOMotorClient,
+                                 AsyncIOMotorDatabase)
 
 
-client = motor_asyncio.AsyncIOMotorClient("mongodb://localhost:27017")
-db = client.employee
-employee_collection = db.get_collection("employee_collection")
+client = AsyncIOMotorClient("mongodb://localhost:27017")
+database = client.employee
+
+
+def get_database() -> AsyncIOMotorDatabase:
+    return database

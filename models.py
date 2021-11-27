@@ -1,5 +1,3 @@
-from typing import Optional
-from bson import ObjectId
 from pydantic import EmailStr, BaseModel, Field
 
 

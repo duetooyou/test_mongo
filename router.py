@@ -10,7 +10,9 @@ router_employees = APIRouter(prefix="/employees",
 
 @router_employees.get('/')
 async def get_all_employees(database: AsyncIOMotorDatabase = Depends(get_database),
-                            company: str = Query('Google')) -> ResponseModel:
+                            company: str = Query("Google")):
     collection = database.employee_collection.find({"company": company})
     employees = [Employee(**employees) async for employees in collection]
-    return employees
+    if employees:
+        return ResponseModel(employees, 'all right')
+    return ErrorResponseModel('error_code', 'smthng wrong')

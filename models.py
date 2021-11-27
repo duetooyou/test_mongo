@@ -1,7 +1,25 @@
+from bson import ObjectId
 from pydantic import EmailStr, BaseModel, Field
 
 
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid objectid")
+        return ObjectId(v)
+
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")
+
+
 class Employee(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     name: str = Field(...)
     email: EmailStr = Field(...)
     age: int = Field(..., gt=0)
@@ -12,6 +30,7 @@ class Employee(BaseModel):
     salary: int = Field(..., gt=0)
 
     class Config:
+        json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
                 "name": "Kamal Carson",
@@ -34,5 +53,5 @@ def ResponseModel(data, message):
     }
 
 
-def ErrorResponseModel(error, code, message):
-    return {"error": error, "code": code, "message": message}
+def ErrorResponseModel(code, message):
+    return {"code": code, "message": message}

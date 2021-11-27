@@ -16,6 +16,16 @@ def get_test_database():
     return database_test
 
 
+@app.on_event("startup")
+async def startup():
+    print("Старт")
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    print("Стоп")
+
+
 @pytest.fixture(scope="session")
 def event_loop():
     loop = asyncio.get_event_loop()
@@ -25,7 +35,7 @@ def event_loop():
 
 @pytest.fixture
 async def test_client():
-    # app.dependency_overrides[get_database] = get_test_database()
+    app.dependency_overrides[get_database] = get_test_database
     async with LifespanManager(app):
         async with httpx.AsyncClient(app=app, base_url="http://test") as test_client:
             yield test_client
@@ -68,6 +78,5 @@ async def initial_employees():
 
 @pytest.mark.asyncio
 async def test_get_employees(test_client: httpx.AsyncClient):
-    response = await test_client.get(url="/employees/")
-    response.status_code == 200
-    print(response.json())
+    response = await test_client.get("/employees/", params={'company': 'Google'})
+    assert response.status_code == 200

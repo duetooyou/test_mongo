@@ -4,7 +4,7 @@ COPY REPOSITORY:
 git clone https://github.com/duetooyou/test_mongo
 
 INSTALL REQUIRMENTS:
-pip install -r requrments.txt
+pip install -r requirments.txt
 
 START SERVER DEV:
 uvicorn main:app --reload
